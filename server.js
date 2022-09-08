@@ -1,11 +1,16 @@
-var express = require("express");
-var bodyParser = require("body-parser");
-var app = express();
-var http = require("http").Server(app);
-var io = require("socket.io")(http);
-var mongoose = require("mongoose");
+import express from "express";
+import bodyParser from "body-parser";
+import mongoose from "mongoose";
+import path from "path";
+import { fileURLToPath } from "url";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
-app.use(express.static(__dirname));
+var app = express();
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+app.use(express.static(path.join(__dirname)));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -58,10 +63,20 @@ app.post("/messages", async (req, res) => {
   }
 });
 
-io.on("connection", () => {
-  console.log("a user is connected");
+const httpServer = createServer(app);
+
+const io = new Server(httpServer, {
+  // ...
 });
 
-var server = http.listen(3000, () => {
+io.on("connection", () => {
+  // ...
+});
+
+// io.on("connection", () => {
+//   console.log("a user is connected");
+// });
+
+var server = httpServer.listen(3000, () => {
   console.log("server is running on port", server.address().port);
 });
